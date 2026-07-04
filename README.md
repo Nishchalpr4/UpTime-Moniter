@@ -32,45 +32,16 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 My End-to-End Build Thought Process (Phase 0: Scope & PRD)
 
-Before writing any code or architecture designs, I fed the prompt into **Claude 3.5 Sonnet / Opus** to clarify the exact scope boundaries and identify hidden requirements for the UPtime monitor:
+To build a simple, responsive uptime monitor, I first analyzed the requirements and defined a strict MVP scope to avoid over-engineering:
 
-### 1. UPtime Scope & PRD Parameters
-
-- **Core MVP Features (In Scope)**:
-  - Register URLs via a REST API and persist them.
-  - Automatically check the health of all registered URLs every 60 seconds.
-  - Record the HTTP status code, latency (ms), and timestamp of every check.
-  - Render a clean, real-time dark mode dashboard displaying URL status and metrics.
-  - Orchestrate all components (React, FastAPI, Postgres) to boot out-of-the-box locally via `docker compose up`.
-
-- **Scope Exclusions (Out of Scope)**:
-  - No user authentication, passwords, or multi-user workspaces.
-  - No active notifications (Slack, SMS, or Email alerts).
-  - No analytical history charts or SSL certificate expiry checks.
-
-- **Hidden Risks & Mitigations Identified**:
-  - *Risk*: A target endpoint hangs indefinitely, blocking the scheduler execution. 
-    *Mitigation*: Enforce a strict `10-second` HTTP request timeout.
-  - *Risk*: Database write-locks or file permission errors on Windows hosts using SQLite inside Docker Compose.
-    *Mitigation*: Avoid SQLite; use standard PostgreSQL 15 with Docker volume mapping.
-  - *Risk*: The frontend displays a confusing `PENDING` status for new URLs.
-    *Mitigation*: Execute the initial check synchronously inside the API's registration endpoint, writing the first log immediately.
-  - *Risk*: API container attempts database connection before the Postgres container is healthy and fully booted.
-    *Mitigation*: Add `healthcheck` to the Postgres service and `condition: service_healthy` to the backend.
-
-```mermaid
-graph TD
-    A[Analyze UPtime Specs] --> B[PRD Definition: FastAPI + React + Postgres]
-    B --> C[Exclude: Auth, Alerting, Latency Charts]
-    C --> D[Mitigate: 10s Timeouts, Postgres Volume Safety, Sync Initial Pings]
-    D --> E[Establish Code constraints & Docker configs]
-
-    style A fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style B fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style C fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
-    style D fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
-    style E fill:#064e3b,stroke:#10b981,stroke-width:3px,color:#fff
-```
+- **What I Built**:
+  - **Pinger**: FastAPI backend running an `APScheduler` background thread checking URLs every 60s.
+  - **Database**: PostgreSQL logging status codes, millisecond response latencies, and check timestamps.
+  - **UI**: Clean React dashboard displaying current status (UP/DOWN) and average latency metrics.
+- **What I Excluded**: User signup/login, active alerts (Slack/Email), and detailed latency history charts.
+- **Core Risks Handled**:
+  - *Slow target sites*: Enforced a 10s request timeout so unresponsive sites don't block the background scheduler loop.
+  - *Initial lag*: Programmed the backend to ping new URLs synchronously on registration so status displays instantly, preventing any default 60s check delays.
 
 ---
 
