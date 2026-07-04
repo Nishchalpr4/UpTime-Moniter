@@ -86,27 +86,53 @@ resource "aws_ecs_task_definition" "backend" {
 
 ## 🧠 My End-to-End Build Thought Process
 
-Here is the exact thought process and plan I followed to design and execute this project from scratch:
+I structured my entire workflow into three main stages (Planning, Architecture, and Step-by-Step Execution) to ensure maximum development velocity and eliminate potential project blockers early.
 
-### 1. Scope & PRD Mapping (Planning)
-- **Problem Statement Analysis**: I first analyzed the core problem statement. I immediately stripped out unnecessary features (like user login, custom alerts, or complex charts) to focus strictly on a bare-minimum, high-velocity MVP.
-- **Hidden Requirements Discovery**: I fed the problem statement into **Claude 3.5 Sonnet** to identify potential technical issues. 
-- **Goal Definition**: I compiled a Product Requirement Document (PRD) to define explicit boundaries (such as connection timeouts on broken endpoints) and establish a clear objective before writing any code.
+### 1. The Design & Execution Flowchart
 
-### 2. Stack Architecture Decisions
-- **Backend framework**: I chose FastAPI because of its native async performance, built-in validation models (Pydantic), and automatic Swagger docs.
-- **Scheduler**: Instead of introducing heavy architectures (like Celery + Redis), I decided to use `APScheduler` inside a background thread to run checks with zero external dependencies.
-- **Database**: I chose PostgreSQL over SQLite to avoid multi-container volume locking issues during Docker Compose executions on Windows.
-- **Code Layout**: I opted for a single-file backend (`main.py`) to eliminate nested module overhead and maintain velocity.
+```mermaid
+graph TD
+    %% Planning Step
+    subgraph Plan ["1. Scope & PRD Mapping (Planning)"]
+        A[Analyze problem statement] --> B[Strip redundant features: Celery/Auth]
+        B --> C[Feed constraints to Claude 3.5 Sonnet]
+        C --> D[Compile PRD with connection timeouts]
+    end
 
-### 3. Step-by-Step Execution Flow
-1. **Scaffolding**: Created the file structure manually, bypassing local Windows scripting locks.
-2. **Backend Development**: Created the Postgres tables and wrote parameterised SQL CRUD queries to secure the database.
-3. **Pinger Thread Setup**: Setup the background pinger loop with fallback error handlers to mark dead/invalid URLs as `down` without crashing the thread.
-4. **UX Optimization (Instant Pings)**: Realizing that new URLs were showing a "PENDING" status on creation, I updated the POST route to ping the URL synchronously first so the frontend displays the status instantly on reload.
-5. **Frontend Dashboard**: Created a minimal, desaturated dark slate UI including key statistic numbers and a manually triggered, interactive refresh button.
-6. **Container Orchestration**: Structured the Dockerfiles and mapped Compose health checks to make the backend wait until Postgres is fully online.
-7. **QA Audit**: Scanned for edge-case bugs and resolved a critical JS rendering bug that was hiding `0ms` response times.
+    %% Architecture Step
+    subgraph Arch ["2. Stack Architecture Design"]
+        E[Select FastAPI async API framework] --> F[Configure APScheduler background thread]
+        F --> G[Select PostgreSQL for multi-container locking safety]
+        G --> H[Merge into a clean single-file backend main.py]
+    end
+
+    %% Execution Step
+    subgraph Exec ["3. Step-by-Step Execution Flow"]
+        I[Scaffold: Write package.json/configs manually] --> J[Backend: Parameterised SQL inserts]
+        J --> K[Scheduler: Fallback error handles for dead URLs]
+        K --> L[UX Optimization: Sync ping on POST request]
+        L --> M[UI: Minimal desaturated slate dark CSS]
+        M --> N[Orchestrate: Docker healthcheck pg_isready]
+        N --> O[QA: Patch 0ms React falsy rendering bug]
+    end
+
+    Plan --> Arch --> Exec
+
+    style Plan fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Arch fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style Exec fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+```
+
+### 2. My Engineering Mindset & Decisions
+
+| Phase | My Thought Process & Decisions | Core Objective |
+|---|---|---|
+| **PRD & Scope Planning** | • I focused on shipping the absolute bare-minimum MVP layout.<br>• I eliminated user logins, charts, and notification integrations to prevent scope creep.<br>• I used Claude 3.5 Sonnet to outline requirements and identify connection timeouts as a major risk factor. | **Build a secure, fast-track MVP.** |
+| **Architecture Selection** | • **FastAPI**: Async-native speeds up concurrent HTTP requests.<br>• **APScheduler**: Avoids complex Redis/Celery queue orchestration by running inside an API background thread.<br>• **PostgreSQL**: Standardized container volume persistence; avoided SQLite which is prone to write lock crashes inside Docker on Windows. | **Establish a robust database and backend contract.** |
+| **Scaffolding & Setup** | • I bypassed local scripting policies on Windows by manually writing Vite package lists instead of relying on default CLI scaffolding scripts. | **Scaffold a clean, dependency-controlled workspace.** |
+| **Backend & Pinger Dev** | • I wrote SQL queries using parameterized placeholders to prevent SQL injection.<br>• I wrapped target checks in robust try/except blocks to log timeouts as `down` states instead of crashing the scheduler thread. | **Build resilient, secure API routes.** |
+| **UX & UI Styling** | • I realized new URLs showed "PENDING" states on creation. I resolved this by running the first ping synchronously in the POST handler.<br>• I designed a desaturated dark slate layout to keep the dashboard highly readable. | **Provide immediate, clean visual feedback.** |
+| **QA & Orchestration** | • I scanned code for edge bugs and resolved a critical JS logic issue where a `0ms` response latency was hidden as falsy on the UI (patched to `!= null`).<br>• I configured database health checks so the backend wait-boots correctly. | **Ship a secure, verified, zero-dependency environment.** |
 
 ---
 
