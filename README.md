@@ -7,7 +7,7 @@ UPtime is a lightweight, full-stack monitor that tracks the availability of web 
 
 ## 🚀 1-Line Setup & Local Execution
 - **Prerequisite**: Docker Desktop installed and running.
-- **Run the Application**:
+- **Run the Application** (in the project root directory):
   ```bash
   docker compose up --build
   ```
