@@ -84,6 +84,32 @@ resource "aws_ecs_task_definition" "backend" {
 
 ---
 
+## 🧠 My End-to-End Build Thought Process
+
+Here is the exact thought process and plan I followed to design and execute this project from scratch:
+
+### 1. Scope & PRD Mapping (Planning)
+- **Problem Statement Analysis**: I first analyzed the core problem statement. I immediately stripped out unnecessary features (like user login, custom alerts, or complex charts) to focus strictly on a bare-minimum, high-velocity MVP.
+- **Hidden Requirements Discovery**: I fed the problem statement into **Claude 3.5 Sonnet** to identify potential technical issues. 
+- **Goal Definition**: I compiled a Product Requirement Document (PRD) to define explicit boundaries (such as connection timeouts on broken endpoints) and establish a clear objective before writing any code.
+
+### 2. Stack Architecture Decisions
+- **Backend framework**: I chose FastAPI because of its native async performance, built-in validation models (Pydantic), and automatic Swagger docs.
+- **Scheduler**: Instead of introducing heavy architectures (like Celery + Redis), I decided to use `APScheduler` inside a background thread to run checks with zero external dependencies.
+- **Database**: I chose PostgreSQL over SQLite to avoid multi-container volume locking issues during Docker Compose executions on Windows.
+- **Code Layout**: I opted for a single-file backend (`main.py`) to eliminate nested module overhead and maintain velocity.
+
+### 3. Step-by-Step Execution Flow
+1. **Scaffolding**: Created the file structure manually, bypassing local Windows scripting locks.
+2. **Backend Development**: Created the Postgres tables and wrote parameterised SQL CRUD queries to secure the database.
+3. **Pinger Thread Setup**: Setup the background pinger loop with fallback error handlers to mark dead/invalid URLs as `down` without crashing the thread.
+4. **UX Optimization (Instant Pings)**: Realizing that new URLs were showing a "PENDING" status on creation, I updated the POST route to ping the URL synchronously first so the frontend displays the status instantly on reload.
+5. **Frontend Dashboard**: Created a minimal, desaturated dark slate UI including key statistic numbers and a manually triggered, interactive refresh button.
+6. **Container Orchestration**: Structured the Dockerfiles and mapped Compose health checks to make the backend wait until Postgres is fully online.
+7. **QA Audit**: Scanned for edge-case bugs and resolved a critical JS rendering bug that was hiding `0ms` response times.
+
+---
+
 ## 🤖 AI Collaboration Log
 
 ### 1. The AI Tech Stack
