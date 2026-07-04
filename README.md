@@ -79,19 +79,22 @@ sequenceDiagram
 
 To achieve maximum execution velocity, the entire environment was built using **Cursor IDE powered by Claude 3.5 Sonnet** as a unified AI engineering agent.
 
-### 1. AI Tool Selection Trade-offs
+### 1. Cursor Agent Integration Loop
+I leveraged the Cursor agent to interact directly with the workspace files and local OS terminal shell:
 
 ```mermaid
 graph TD
-    Start([Need AI Developer Assistant]) --> Workflow{Primary Goal?}
-    
-    Workflow -->|Multi-file edits & terminal control| Chosen[Cursor + Claude 3.5 Sonnet]
-    Workflow -->|Simple line autocomplete| Copilot[GitHub Copilot]
-    Workflow -->|General Q&A / Copy-paste| Web[ChatGPT / Claude Web]
+    User([I Command Agent]) -->|1. Prompt instructions & directory context| Cursor[Cursor Agent Engine]
+    Cursor -->|2. Multi-file edits| Code[Codebase: main.py / App.jsx]
+    Cursor -->|3. Terminal execution| Shell[System Shell: Docker compose / npm]
+    Shell -->|4. Compiler stdout & errors| Cursor
+    Cursor -->|5. Self-refactoring loops| Code
+    Cursor -->|6. Verified state update| User
 
-    style Chosen fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
-    style Copilot fill:#0f172a,stroke:#64748b,color:#fff
-    style Web fill:#0f172a,stroke:#64748b,color:#fff
+    style User fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Cursor fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
+    style Code fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Shell fill:#0b0f19,stroke:#f59e0b,stroke-width:2px,color:#fff
 ```
 
 | Tool Choice | Why Selected Over Alternatives |
