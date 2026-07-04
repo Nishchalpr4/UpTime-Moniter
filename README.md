@@ -30,14 +30,36 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 End-to-End Building Methodology
 
-### Step 1: Phase 0 PRD & Scoping
+### Phase 0: PRD & Scoping
 I started the project by mapping out the absolute bare minimum parameters:
-
 - **I defined the requirements**: The application must be lightweight, self-contained, and run locally out-of-the-box using a single command.
 - **I defined the core features**:
   - A background pinger to check URL status every 60 seconds.
   - A database to log latency, status codes, and timestamps.
   - A dark-themed dashboard to visualize status (UP/DOWN) and statistics.
+
+### Phase 1: System Design
+I leveraged the **Claude Opus** thinking model to design the database architecture, backend components, and container layout:
+- **Core Backend Logic**:
+  - The API exposes endpoints for registering, listing, and deleting URLs.
+  - A background scheduler runs on a separate thread to handle cron pings concurrently.
+- **Design Trade-offs**:
+  - *FastAPI + APScheduler*: Chosen to avoid the overhead of heavy message queues like Redis or Celery.
+  - *PostgreSQL*: Selected over SQLite to guarantee write safety under Docker container volume persistence.
+
+```mermaid
+graph LR
+    UI[React Dashboard] <--> API[FastAPI API]
+    API <--> DB[(PostgreSQL)]
+    Scheduler[APScheduler] -.->|Ping every 60s| Websites[Target Sites]
+    Scheduler -.->|Log results| DB
+
+    style UI fill:#151b2c,stroke:#38bdf8,color:#fff
+    style API fill:#151b2c,stroke:#38bdf8,color:#fff
+    style DB fill:#151b2c,stroke:#38bdf8,color:#fff
+    style Scheduler fill:#151b2c,stroke:#34d399,color:#fff
+    style Websites fill:#151b2c,stroke:#64748b,color:#fff
+```
 
 ---
 
