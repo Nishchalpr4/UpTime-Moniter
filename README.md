@@ -93,11 +93,9 @@ graph TD
     style Deploy fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
 
-| Tool Choice | Why I Chose It Over Alternatives |
-|---|---|
-| **Cursor + Claude Opus 4.6** <br>*(Chosen)* | **I selected this** because the deep logic reasoning of Claude Opus 4.6 combined with Cursor's ability to index folder contexts and execute shell commands inside the terminal allowed the scaffolding, building, and debugging of the entire stack in minutes. |
-| **GitHub Copilot** <br>*(Rejected)* | **I rejected this** because it is limited to line-by-line autocompletion and lacks the cross-file reasoning needed to write database schemas and configure Docker files. |
-| **ChatGPT / Claude Web** <br>*(Rejected)* | **I rejected this** because copy-pasting code between browser chats and local files introduces high friction and increases the risk of sync errors. |
+**My Tool Choice**: I selected **Cursor IDE (powered by Claude Opus 4.6)** as my single, unified AI coding agent. The deep logic reasoning of Claude Opus 4.6 combined with Cursor's ability to index folder contexts and execute shell commands inside the terminal allowed the scaffolding, building, and debugging of the entire stack in minutes without leaving my editor.
+
+---
 
 ### 2. My Agentic Lifecycle & Implementation Loop
 
