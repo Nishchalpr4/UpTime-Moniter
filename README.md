@@ -68,6 +68,20 @@ graph LR
 
 ---
 
+### ⚙️ Phase 2: Backend Development
+- **Scaffolding APIs**: I used AI to scaffold the REST endpoints in a single `main.py` file, setting up the database connection pool and request validation models.
+- **Refinement**: I reviewed the execution loop and **adjusted timeout handling** to use a strict 10s request timeout, preventing slow websites from blocking the scheduler.
+- **Immediate Pings**: I programmed the backend to ping new URLs synchronously on registration so the UI updates status instantly without a default 60s delay.
+
+---
+
+### 💻 Phase 3: Frontend Development
+- **Dashboard UI**: I used AI to generate the core React dashboard, creating the statistics widgets and card structures.
+- **Refinement**: I **refined the polling frequency** to refresh every 30 seconds and customized the handling of network errors and blank states.
+- **Visuals**: Replaced neon elements with a cohesive, desaturated dark slate layout for a clean, professional aesthetic.
+
+---
+
 ## ⚖️ My Technology Trade-offs
 
 | My Choice | What I Rejected | Why I Chose It |
