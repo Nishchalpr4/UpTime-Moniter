@@ -30,28 +30,37 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 End-to-End Building Methodology
 
-### Phase 0: PRD & Scoping
-I started the project by mapping out the absolute bare minimum parameters:
-- **I defined the requirements**: The application must be lightweight, self-contained, and run locally out-of-the-box using a single command.
-- **I defined the core features**:
-  - A background pinger to check URL status every 60 seconds.
-  - A database to log latency, status codes, and timestamps.
-  - A dark-themed dashboard to visualize status (UP/DOWN) and statistics.
+---
 
-### Phase 1: System Design
-I leveraged the **Claude Opus** thinking model to design the database architecture, backend components, and container layout:
-- **Core Backend Logic**:
-  - The API exposes endpoints for registering, listing, and deleting URLs.
-  - A background scheduler runs on a separate thread to handle cron pings concurrently.
-- **Design Trade-offs**:
-  - *FastAPI + APScheduler*: Chosen to avoid the overhead of heavy message queues like Redis or Celery.
-  - *PostgreSQL*: Selected over SQLite to guarantee write safety under Docker container volume persistence.
+### 📋 Phase 0: PRD & Scoping
+> [!NOTE]
+> **Core Objective**: Map out the absolute minimum footprint required for a responsive full-stack monitor.
+
+- **Requirements Defined**:
+  - The application must be lightweight, self-contained, and deployable locally with **one terminal command**.
+- **Core Features Selected**:
+  - **Pinger**: A background scheduler checking URLs every 60 seconds.
+  - **Database**: PostgreSQL logging status codes, latency (ms), and timestamps.
+  - **UI**: A dark-themed dashboard to visualize real-time UP/DOWN status.
+
+---
+
+### 🎨 Phase 1: System Design
+> [!TIP]
+> **AI Acceleration**: I leveraged **Claude Opus's** deep reasoning to map out the system flows and container topologies before writing code.
+
+- **Core Backend Architecture**:
+  - Exposes REST API endpoints (`GET /api/urls`, `POST /api/urls`, `DELETE /api/urls/{id}`).
+  - Runs pings in a background `APScheduler` thread to keep the web application non-blocking.
+- **Design Decisions**:
+  - **FastAPI + APScheduler** over Celery/Redis to keep container overhead at zero.
+  - **PostgreSQL** over SQLite to avoid multi-container volume locking on Windows.
 
 ```mermaid
 graph LR
     UI[React Dashboard] <--> API[FastAPI API]
     API <--> DB[(PostgreSQL)]
-    Scheduler[APScheduler] -.->|Ping every 60s| Websites[Target Sites]
+    Scheduler[APScheduler] -.->|Ping| Websites[Target Sites]
     Scheduler -.->|Log results| DB
 
     style UI fill:#151b2c,stroke:#38bdf8,color:#fff
