@@ -32,19 +32,38 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 My End-to-End Build Thought Process (Phase 0: Scope & PRD)
 
-I began this project by focusing strictly on requirement parsing and defining a clear MVP scope before planning any database tables or routes:
+Before writing any code or architecture designs, I fed the prompt into **Claude 3.5 Sonnet / Opus** to clarify the exact scope boundaries and identify hidden requirements for the UPtime monitor:
 
-### 1. Scope & PRD Mapping (Planning)
-- **Problem Statement Analysis**: I first analyzed the core problem statement. I immediately stripped out unnecessary features (like user login, custom alerts, or complex charts) to focus strictly on a bare-minimum, high-velocity MVP.
-- **Hidden Requirements Discovery**: I fed the problem statement into **Claude 3.5 Sonnet / Opus** to identify potential technical issues.
-- **Goal Definition**: I compiled a Product Requirement Document (PRD) to define explicit boundaries (such as connection timeouts on broken endpoints) and establish a clear objective before writing any code.
+### 1. UPtime Scope & PRD Parameters
+
+- **Core MVP Features (In Scope)**:
+  - Register URLs via a REST API and persist them.
+  - Automatically check the health of all registered URLs every 60 seconds.
+  - Record the HTTP status code, latency (ms), and timestamp of every check.
+  - Render a clean, real-time dark mode dashboard displaying URL status and metrics.
+  - Orchestrate all components (React, FastAPI, Postgres) to boot out-of-the-box locally via `docker compose up`.
+
+- **Scope Exclusions (Out of Scope)**:
+  - No user authentication, passwords, or multi-user workspaces.
+  - No active notifications (Slack, SMS, or Email alerts).
+  - No analytical history charts or SSL certificate expiry checks.
+
+- **Hidden Risks & Mitigations Identified**:
+  - *Risk*: A target endpoint hangs indefinitely, blocking the scheduler execution. 
+    *Mitigation*: Enforce a strict `10-second` HTTP request timeout.
+  - *Risk*: Database write-locks or file permission errors on Windows hosts using SQLite inside Docker Compose.
+    *Mitigation*: Avoid SQLite; use standard PostgreSQL 15 with Docker volume mapping.
+  - *Risk*: The frontend displays a confusing `PENDING` status for new URLs.
+    *Mitigation*: Execute the initial check synchronously inside the API's registration endpoint, writing the first log immediately.
+  - *Risk*: API container attempts database connection before the Postgres container is healthy and fully booted.
+    *Mitigation*: Add `healthcheck` to the Postgres service and `condition: service_healthy` to the backend.
 
 ```mermaid
 graph TD
-    A[Analyze Problem Statement] --> B[Identify Core MVP Features]
-    B --> C[Isolate Scope Boundaries: No Auth/Alerts]
-    C --> D[Identify Risks: Connection Timeouts & Volume Locks]
-    D --> E[Establish PRD & Code Constraints]
+    A[Analyze UPtime Specs] --> B[PRD Definition: FastAPI + React + Postgres]
+    B --> C[Exclude: Auth, Alerting, Latency Charts]
+    C --> D[Mitigate: 10s Timeouts, Postgres Volume Safety, Sync Initial Pings]
+    D --> E[Establish Code constraints & Docker configs]
 
     style A fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
     style B fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
