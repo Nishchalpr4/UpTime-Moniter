@@ -65,7 +65,7 @@ graph TD
 
 ## 🤖 My AI-Driven Development Loop (Cursor + Claude Opus 4.6)
 
-To achieve maximum execution velocity, the entire environment was built using **Cursor IDE powered by Claude Opus 4.6** as a unified AI engineering agent.
+This project was built through a **human-in-the-loop AI orchestration model**. Instead of generating code blocks blindly, I acted as the **System Architect and Conductor**, steering the Cursor coding agent through structured verification checkpoints, debugging cycles, and integration milestones from planning to final deployment.
 
 ### 1. Parallel Multi-Agent Scaffolding Loop
 I directed Claude Opus 4.6 to run validation check gates first, spawn parallel development loops for separate components, configure Dockerfiles on each end, and combine them into a single compose file:
