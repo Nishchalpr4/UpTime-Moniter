@@ -99,34 +99,13 @@ graph TD
 | **GitHub Copilot** <br>*(Rejected)* | **I rejected this** because it is limited to line-by-line autocompletion and lacks the cross-file reasoning needed to write database schemas and configure Docker files. |
 | **ChatGPT / Claude Web** <br>*(Rejected)* | **I rejected this** because copy-pasting code between browser chats and local files introduces high friction and increases the risk of sync errors. |
 
----
-
 ### 2. My Agentic Lifecycle & Implementation Loop
 
-I drove the Cursor coding agent through a structured lifecycle to bypass manual development bottlenecks and deploy the MVP:
-```mermaid
-graph TD
-    PRD[1. PRD Define<br>• I analyzed specifications & boundaries<br>• I scoped the MVP features and exclusions<br>• I documented risk mitigation strategies]
-    -->
-    Harness[2. Harness Engineering<br>• I bypassed PowerShell execution locks<br>• I generated config files and folder directories<br>• I verified network ports and volume mounts]
-    -->
-    Deploy[3. Multi-Agent Deploy<br>• I spawned parallel agent build tasks<br>• I constructed App.jsx and backend main.py<br>• I generated target Dockerfiles on each end]
-    -->
-    Integrate[4. System Integration<br>• I connected the React frontend to FastAPI<br>• I enabled synchronous ping verification<br>• I orchestrated the Docker Compose conductor]
-    -->
-    Ship([Ship MVP 🚀])
-
-    style PRD fill:#111827,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style Harness fill:#111827,stroke:#34d399,stroke-width:2px,color:#fff
-    style Deploy fill:#111827,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style Integrate fill:#111827,stroke:#ef4444,stroke-width:2px,color:#fff
-    style Ship fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
-```
-
-- **1. PRD Define**: I analyzed the spec boundaries and directed the agent to document constraints (such as connection timeouts on dead targets) to form a clear project objective before writing code.
-- **2. Harness Engineering**: I set up the environment structure. I instructed the agent to create empty configurations (`requirements.txt`, `package.json`, and Docker compose files) first to verify network ports and database volumes could initialize before adding logic.
-- **3. Multi-Agent Deploy**: I executed parallel milestones. I directed the agent to concurrently generate the Postgres database schemas (`init.sql`), code backend CRUD endpoints (`main.py`), and construct the dashboard component structures (`App.jsx`).
-- **4. System Integration**: I wired the frontend to the API endpoints. I bypassed local scripting policies by manual scaffolding, resolved CORS blocks, and updated the backend POST route to execute pings synchronously for immediate UI updates.
+I drove the development process by guiding the Cursor agent through a structured 4-stage lifecycle:
+- **1. PRD Define**: I analyzed the specifications and directed the agent to isolate constraints (e.g. timeout logic) to set a clear MVP scope boundary before generating code.
+- **2. Harness Engineering**: I set up the environment files and folders. I had the agent generate empty configurations (`requirements.txt`, `package.json`, and Docker compose skeletons) to verify network ports and DB connections before writing logic.
+- **3. Multi-Agent Deploy**: I executed parallel milestones. I directed the agent to concurrently construct the Postgres database schemas (`init.sql`), code the backend CRUD routes (`main.py`), and generate the dashboard components (`App.jsx`).
+- **4. System Integration**: I wired the API and UI layers. I bypassed local Windows script locks by manual bootstrapping, resolved CORS blocks, and refactored the POST route to ping target URLs synchronously for instant status updates.
 
 ---
 
