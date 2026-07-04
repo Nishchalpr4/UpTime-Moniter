@@ -6,36 +6,18 @@ UPtime is a lightweight, full-stack monitor that tracks the availability of web 
 ---
 
 ## 🚀 1-Line Setup & Local Execution
-
-### Prerequisites
-Make sure you have **Docker Desktop** installed and running on your machine:
-- [Download Docker Desktop for Windows/Mac/Linux](https://www.docker.com/products/docker-desktop/)
-
----
-
-### Step 1: Run the 1-Line Startup Command
-Open your terminal in the root directory of this project and run:
-```bash
-docker compose up --build
-```
-*This command pulls PostgreSQL, builds the local Python/FastAPI backend and React/Vite frontend images, sets up their shared virtual network, and boots the entire ecosystem.*
-
----
-
-### Step 2: Access the Application Services
-Once the logs show that the services are online, navigate to:
-- 💻 **Frontend Dashboard**: [http://localhost:5173](http://localhost:5173)
-- ⚙️ **FastAPI Backend (Swagger API Docs)**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- 🗄️ **Database Service**: Running internally at `localhost:5432`
-
----
-
-### Step 3: Tear Down the Stack
-To stop the containers and release network ports, press `Ctrl+C` in your terminal, or run:
-```bash
-docker compose down
-```
-*Note: Your monitored URL registry and ping history are stored safely in a local Docker volume (`postgres_data`) and will persist across runs.*
+- **Prerequisite**: Docker Desktop installed and running.
+- **Run the Application**:
+  ```bash
+  docker compose up --build
+  ```
+- **Access Endpoints**:
+  - Dashboard UI: [http://localhost:5173](http://localhost:5173)
+  - API Docs (Swagger): [http://localhost:8000/docs](http://localhost:8000/docs)
+- **Stop the Application**:
+  ```bash
+  docker compose down
+  ```
 
 ---
 
