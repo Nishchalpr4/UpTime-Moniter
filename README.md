@@ -30,55 +30,37 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 End-to-End Building Methodology
 
----
-
-### 📋 Phase 0: PRD & Scoping
-- **Core Objective**: Map out the absolute minimum footprint required for a responsive full-stack monitor.
-- **Requirements Defined**:
-  - The application must be lightweight, self-contained, and deployable locally with **one terminal command**.
-- **Core Features Selected**:
-  - **Pinger**: A background scheduler checking URLs every 60 seconds.
-  - **Database**: PostgreSQL logging status codes, latency (ms), and timestamps.
-  - **UI**: A dark-themed dashboard to visualize real-time UP/DOWN status.
-
----
-
-### 🎨 Phase 1: System Design
-- **AI Acceleration**: I leveraged **Claude Opus's** deep reasoning to map out the system flows and container topologies before writing code.
-- **Core Backend Architecture**:
-  - Exposes REST API endpoints (`GET /api/urls`, `POST /api/urls`, `DELETE /api/urls/{id}`).
-  - Runs pings in a background `APScheduler` thread to keep the web application non-blocking.
-- **Design Decisions**:
-  - **FastAPI + APScheduler** over Celery/Redis to keep container overhead at zero.
-  - **PostgreSQL** over SQLite to avoid multi-container volume locking on Windows.
+I systematically drove the AI coding agent phase-by-phase using structured instructions to analyze, design, scaffold, implement, test, and package this application:
 
 ```mermaid
-graph LR
-    UI[React Dashboard] <--> API[FastAPI API]
-    API <--> DB[(PostgreSQL)]
-    Scheduler[APScheduler] -.->|Ping| Websites[Target Sites]
-    Scheduler -.->|Log results| DB
+graph TD
+    P0[Phase 0: Scope & PRD] -->|I directed the agent to isolate constraints & block scope creep| P1[Phase 1: Architecture]
+    P1 -->|I compared tech stacks & designed schemas with Claude Opus| P2[Phase 2: Milestone Plan]
+    P2 -->|I generated scaffolding checklists & tasks| P3[Phase 3: Scaffold Skeleton]
+    P3 -->|I bypassed local script blocks with manual package files| P4[Phase 4: Backend API]
+    P4 -->|I built CRUD endpoints & database connections in main.py| P5[Phase 5: Background Scheduler]
+    P5 -->|I wired APScheduler threads & configured 10s request timeouts| P6[Phase 6: Frontend UI]
+    P6 -->|I designed statistics cards & customized dark slate styling| P7[Phase 7: Integration & UX]
+    P7 -->|I linked routes & enabled synchronous instant pings on URL creation| P8[Phase 8: Dockerization]
+    P8 -->|I scripted Dockerfiles & configured Compose pg_isready health checks| P9[Phase 9: QA & Verification]
+    P9 -->|I audited edge cases & patched the 0ms JS truthy rendering bug| P10[Phase 10: Code Review]
+    P10 -->|I refactored redundant code blocks & verified endpoint security| P11[Phase 11: Final Docs]
+    P11 -->|I compiled clean README instructions & deployment Terraform templates| Ready[MVP Fully Shipped 🚀]
 
-    style UI fill:#151b2c,stroke:#38bdf8,color:#fff
-    style API fill:#151b2c,stroke:#38bdf8,color:#fff
-    style DB fill:#151b2c,stroke:#38bdf8,color:#fff
-    style Scheduler fill:#151b2c,stroke:#34d399,color:#fff
-    style Websites fill:#151b2c,stroke:#64748b,color:#fff
+    style P0 fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style P1 fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style P2 fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style P3 fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style P4 fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style P5 fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style P6 fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style P7 fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style P8 fill:#0b0f19,stroke:#f59e0b,stroke-width:2px,color:#fff
+    style P9 fill:#0b0f19,stroke:#ef4444,stroke-width:2px,color:#fff
+    style P10 fill:#0b0f19,stroke:#ec4899,stroke-width:2px,color:#fff
+    style P11 fill:#0b0f19,stroke:#64748b,stroke-width:2px,color:#fff
+    style Ready fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
-
----
-
-### ⚙️ Phase 2: Backend Development
-- **Scaffolding APIs**: I used AI to scaffold the REST endpoints in a single `main.py` file, setting up the database connection pool and request validation models.
-- **Refinement**: I reviewed the execution loop and **adjusted timeout handling** to use a strict 10s request timeout, preventing slow websites from blocking the scheduler.
-- **Immediate Pings**: I programmed the backend to ping new URLs synchronously on registration so the UI updates status instantly without a default 60s delay.
-
----
-
-### 💻 Phase 3: Frontend Development
-- **Dashboard UI**: I used AI to generate the core React dashboard, creating the statistics widgets and card structures.
-- **Refinement**: I **refined the polling frequency** to refresh every 30 seconds and customized the handling of network errors and blank states.
-- **Visuals**: Replaced neon elements with a cohesive, desaturated dark slate layout for a clean, professional aesthetic.
 
 ---
 
