@@ -104,37 +104,22 @@ graph TD
 ### 2. My Agentic Lifecycle & Implementation Loop
 
 I drove the Cursor coding agent through a structured lifecycle to bypass manual development bottlenecks and deploy the MVP:
-
 ```mermaid
 graph TD
-    subgraph Phase1 [1. PRD Define]
-        A[Analyze Specs & Constraints] -->|Claude Opus 4.6| B[Isolate MVP Scope Boundaries]
-        B --> C[Draft PRD: Exclude Auth & Alerts]
-    end
+    PRD[1. PRD Define<br>• I analyzed specifications & boundaries<br>• I scoped the MVP features and exclusions<br>• I documented risk mitigation strategies]
+    -->
+    Harness[2. Harness Engineering<br>• I bypassed PowerShell execution locks<br>• I generated config files and folder directories<br>• I verified network ports and volume mounts]
+    -->
+    Deploy[3. Multi-Agent Deploy<br>• I spawned parallel agent build tasks<br>• I constructed App.jsx and backend main.py<br>• I generated target Dockerfiles on each end]
+    -->
+    Integrate[4. System Integration<br>• I connected the React frontend to FastAPI<br>• I enabled synchronous ping verification<br>• I orchestrated the Docker Compose conductor]
+    -->
+    Ship([Ship MVP 🚀])
 
-    subgraph Phase2 [2. Harness Engineering]
-        D[Bypass Local Script Blocks] -->|Manual setup configs| E[Verify Docker Ports & Volumes]
-        E --> F[Generate empty directory tree]
-    end
-
-    subgraph Phase3 [3. Multi-Agent Deploy]
-        G[Fork into Parallel Agent loops] -->|Backend Agent| H[main.py CRUD API & Dockerfile]
-        G -->|Frontend Agent| I[React App.jsx & Dockerfile]
-        G -->|Scheduler Agent| J[Background Pinger & init.sql]
-    end
-
-    subgraph Phase4 [4. System Integration]
-        K[Wire UI to FastAPI endpoints] -->|CORS overrides| L[Refactor POST to synchronous ping]
-        L --> M[QA: Fix 0ms latency render bug]
-        M --> N[Docker Compose Conductor]
-    end
-
-    Phase1 --> Phase2 --> Phase3 --> Phase4 --> Ship[Ship MVP 🚀]
-
-    style Phase1 fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style Phase2 fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
-    style Phase3 fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style Phase4 fill:#0b0f19,stroke:#ef4444,stroke-width:2px,color:#fff
+    style PRD fill:#111827,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Harness fill:#111827,stroke:#34d399,stroke-width:2px,color:#fff
+    style Deploy fill:#111827,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Integrate fill:#111827,stroke:#ef4444,stroke-width:2px,color:#fff
     style Ship fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
 
