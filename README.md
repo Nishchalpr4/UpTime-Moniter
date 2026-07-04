@@ -28,8 +28,9 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 - **Network failure**: Add `https://nonexistent-url-domain-test.xyz` → Instantly displays 🔴 **DOWN** (with `—` latency).
 - **HTTP status failure**: Add `https://httpstat.us/503` → Instantly displays 🔴 **DOWN** (showing `HTTP 503`).
 
----
+## 🧠 End-to-End Building Methodology
 
+### Step 1: Phase 0 PRD & Scoping
 I started the project by mapping out the absolute bare minimum parameters:
 
 - **I defined the requirements**: The application must be lightweight, self-contained, and run locally out-of-the-box using a single command.
