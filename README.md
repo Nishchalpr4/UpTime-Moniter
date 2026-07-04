@@ -33,9 +33,7 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 ---
 
 ### 📋 Phase 0: PRD & Scoping
-> [!NOTE]
-> **Core Objective**: Map out the absolute minimum footprint required for a responsive full-stack monitor.
-
+- **Core Objective**: Map out the absolute minimum footprint required for a responsive full-stack monitor.
 - **Requirements Defined**:
   - The application must be lightweight, self-contained, and deployable locally with **one terminal command**.
 - **Core Features Selected**:
@@ -46,9 +44,7 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 ---
 
 ### 🎨 Phase 1: System Design
-> [!TIP]
-> **AI Acceleration**: I leveraged **Claude Opus's** deep reasoning to map out the system flows and container topologies before writing code.
-
+- **AI Acceleration**: I leveraged **Claude Opus's** deep reasoning to map out the system flows and container topologies before writing code.
 - **Core Backend Architecture**:
   - Exposes REST API endpoints (`GET /api/urls`, `POST /api/urls`, `DELETE /api/urls/{id}`).
   - Runs pings in a background `APScheduler` thread to keep the web application non-blocking.
