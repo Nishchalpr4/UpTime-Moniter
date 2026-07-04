@@ -30,38 +30,13 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ---
 
-## 🧠 My End-to-End Build Thought Process (Phase 0: Scope & PRD)
+I started the project by mapping out the absolute bare minimum parameters:
 
-I mapped the exact boundaries of the MVP using a visual Scope Diagram and an engineering Risk Matrix:
-
-### 1. Scope Boundary Map
-
-```mermaid
-graph TD
-    subgraph IN_SCOPE [What I Built]
-        A[FastAPI background thread pinger]
-        B[PostgreSQL relational storage]
-        C[React dashboard & metrics panel]
-    end
-
-    subgraph OUT_SCOPE [What I Excluded]
-        D[User authentication & logins]
-        E[Active alerts: Slack / Email]
-        F[SSL certificate expiry checks]
-    end
-
-    style IN_SCOPE fill:#0b0f19,stroke:#10b981,stroke-width:2px,color:#fff
-    style OUT_SCOPE fill:#0b0f19,stroke:#ef4444,stroke-width:2px,color:#fff
-```
-
-### 2. Core Risks & Mitigations
-
-| Risk Identified | How I Handled It (Mitigation) |
-|---|---|
-| Target endpoints hang indefinitely, blocking the scheduler thread. | Enforced a strict **10-second request timeout** on all pings. |
-| SQLite database files throwing write-lock errors inside Docker on Windows. | Avoided SQLite; used **PostgreSQL 15** with mapped volumes. |
-| Dashboard showing blank `PENDING` states upon registering a new URL. | Executed the **initial ping synchronously** in the URL registration API. |
-| API container crashing by attempting connections before Postgres is fully booted. | Configured a **Postgres healthcheck** container dependency. |
+- **I defined the requirements**: The application must be lightweight, self-contained, and run locally out-of-the-box using a single command.
+- **I defined the core features**:
+  - A background pinger to check URL status every 60 seconds.
+  - A database to log latency, status codes, and timestamps.
+  - A dark-themed dashboard to visualize status (UP/DOWN) and statistics.
 
 ---
 
