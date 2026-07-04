@@ -105,6 +105,20 @@ graph TD
 
 I drove the Cursor coding agent through a structured lifecycle to bypass manual development bottlenecks and deploy the MVP:
 
+```mermaid
+graph LR
+    PRD[1. PRD Define] -->|Scope Boundaries| Harness[2. Harness Engineering]
+    Harness -->|Boilerplate Checks| Deploy[3. Multi-Agent Deploy]
+    Deploy -->|Parallel Task execution| Integrate[4. System Integration]
+    Integrate -->|Wire APIs & Lags| Ship[Ship MVP 🚀]
+
+    style PRD fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Harness fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style Deploy fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Integrate fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
+    style Ship fill:#0b0f19,stroke:#64748b,stroke-width:2px,color:#fff
+```
+
 - **1. PRD Define**: I analyzed the spec boundaries and directed the agent to document constraints (such as connection timeouts on dead targets) to form a clear project objective before writing code.
 - **2. Harness Engineering**: I set up the environment structure. I instructed the agent to create empty configurations (`requirements.txt`, `package.json`, and Docker compose files) first to verify network ports and database volumes could initialize before adding logic.
 - **3. Multi-Agent Deploy**: I executed parallel milestones. I directed the agent to concurrently generate the Postgres database schemas (`init.sql`), code backend CRUD endpoints (`main.py`), and construct the dashboard component structures (`App.jsx`).
