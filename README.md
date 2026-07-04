@@ -63,9 +63,9 @@ graph TD
 
 ---
 
-## 🤖 My AI-Driven Development Loop (Cursor + Claude Opus 4.6)
+## 🤖 My AI-Driven Development Loop (Antigravity + Claude Opus 4.6)
 
-This project was built through a **human-in-the-loop AI orchestration model**. Instead of generating code blocks blindly, I acted as the **System Architect and Conductor**, steering the Cursor coding agent through structured verification checkpoints, debugging cycles, and integration milestones from planning to final deployment.
+This project was built through a **human-in-the-loop AI orchestration model**. Instead of generating code blocks blindly, I acted as the **System Architect and Conductor**, steering the Antigravity coding assistant through structured verification checkpoints, debugging cycles, and integration milestones from planning to final deployment.
 
 ### 1. Parallel Multi-Agent Scaffolding Loop
 I directed Claude Opus 4.6 to run validation check gates first, spawn parallel development loops for separate components, configure Dockerfiles on each end, and combine them into a single compose file:
@@ -93,13 +93,13 @@ graph TD
     style Deploy fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
 
-**My Tool Choice**: I selected **Cursor IDE (powered by Claude Opus 4.6)** as my single, unified AI coding agent. The deep logic reasoning of Claude Opus 4.6 combined with Cursor's ability to index folder contexts and execute shell commands inside the terminal allowed the scaffolding, building, and debugging of the entire stack in minutes without leaving my editor.
+**My Tool Choice**: I selected **Antigravity IDE (powered by Claude Opus 4.6)** as my single, unified AI coding assistant. The deep logic reasoning of Claude Opus 4.6 combined with Antigravity's ability to index folder contexts and execute shell commands inside the terminal allowed the scaffolding, building, and debugging of the entire stack in minutes without leaving my editor.
 
 ---
 
 ### 2. My Agentic Lifecycle & Implementation Loop
 
-I drove the development process by guiding the Cursor agent through a structured 4-stage lifecycle:
+I drove the development process by guiding the Antigravity assistant through a structured 4-stage lifecycle:
 - **1. PRD Define**: I analyzed the specifications and directed the agent to isolate constraints (e.g. timeout logic) to set a clear MVP scope boundary before generating code.
 - **2. Harness Engineering**: I set up the environment files and folders. I had the agent generate empty configurations (`requirements.txt`, `package.json`, and Docker compose skeletons) to verify network ports and DB connections before writing logic.
 - **3. Multi-Agent Deploy**: I executed parallel milestones. I directed the agent to concurrently construct the Postgres database schemas (`init.sql`), code the backend CRUD routes (`main.py`), and generate the dashboard components (`App.jsx`).
