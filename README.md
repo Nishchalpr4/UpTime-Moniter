@@ -30,36 +30,30 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these endpoints 
 
 ---
 
-## 🏗️ System Architecture & Data Lifecycle
+## 🏗️ System Architecture & Data Flow
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User/Browser
-    participant UI as React UI (5173)
-    participant API as FastAPI (8000)
-    participant DB as Postgres DB (5432)
-    participant Scheduler as Background Pinger
-
-    User->>UI: Add URL (https://example.com)
-    UI->>API: POST /api/urls
-    Note over API: Triggers ping_one() synchronously
-    API->>DB: INSERT status & latency
-    API-->>UI: Return created URL (UP/DOWN)
+graph TD
+    User([User]) -->|1. Register URL| UI[React UI]
+    UI -->|2. POST request| API[FastAPI API]
+    API -->|3. Initial synchronous ping| DB[(PostgreSQL)]
     
-    loop Every 60 seconds
-        Scheduler->>DB: Fetch URLs
-        Scheduler->>User: Pings HTTP endpoints (10s timeout)
-        Scheduler->>DB: INSERT check results (latency, status, code)
+    loop Every 60s
+        Scheduler[Background Pinger] -->|4. Ping checks| Websites[Target Sites]
+        Scheduler -->|5. Log health check results| DB
     end
 
-    loop Every 30 seconds
-        UI->>API: GET /api/urls (Lateral Join)
-        API->>DB: Query URLs + Latest Health Check
-        DB-->>API: URL list with current states
-        API-->>UI: Return JSON
-        UI->>User: Update Dashboard Stats & List
+    loop Every 30s
+        UI -->|6. Polling update requests| API
+        API -->|7. Fetch current states| DB
     end
+
+    style User fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style UI fill:#151b2c,stroke:#38bdf8,color:#fff
+    style API fill:#151b2c,stroke:#38bdf8,color:#fff
+    style DB fill:#151b2c,stroke:#38bdf8,color:#fff
+    style Scheduler fill:#151b2c,stroke:#34d399,color:#fff
+    style Websites fill:#151b2c,stroke:#64748b,color:#fff
 ```
 
 ---
