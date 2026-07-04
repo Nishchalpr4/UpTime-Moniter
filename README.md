@@ -106,17 +106,36 @@ graph TD
 I drove the Cursor coding agent through a structured lifecycle to bypass manual development bottlenecks and deploy the MVP:
 
 ```mermaid
-graph LR
-    PRD[1. PRD Define] -->|Scope Boundaries| Harness[2. Harness Engineering]
-    Harness -->|Boilerplate Checks| Deploy[3. Multi-Agent Deploy]
-    Deploy -->|Parallel Task execution| Integrate[4. System Integration]
-    Integrate -->|Wire APIs & Lags| Ship[Ship MVP 🚀]
+graph TD
+    subgraph Phase1 [1. PRD Define]
+        A[Analyze Specs & Constraints] -->|Claude Opus 4.6| B[Isolate MVP Scope Boundaries]
+        B --> C[Draft PRD: Exclude Auth & Alerts]
+    end
 
-    style PRD fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style Harness fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
-    style Deploy fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style Integrate fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
-    style Ship fill:#0b0f19,stroke:#64748b,stroke-width:2px,color:#fff
+    subgraph Phase2 [2. Harness Engineering]
+        D[Bypass Local Script Blocks] -->|Manual setup configs| E[Verify Docker Ports & Volumes]
+        E --> F[Generate empty directory tree]
+    end
+
+    subgraph Phase3 [3. Multi-Agent Deploy]
+        G[Fork into Parallel Agent loops] -->|Backend Agent| H[main.py CRUD API & Dockerfile]
+        G -->|Frontend Agent| I[React App.jsx & Dockerfile]
+        G -->|Scheduler Agent| J[Background Pinger & init.sql]
+    end
+
+    subgraph Phase4 [4. System Integration]
+        K[Wire UI to FastAPI endpoints] -->|CORS overrides| L[Refactor POST to synchronous ping]
+        L --> M[QA: Fix 0ms latency render bug]
+        M --> N[Docker Compose Conductor]
+    end
+
+    Phase1 --> Phase2 --> Phase3 --> Phase4 --> Ship[Ship MVP 🚀]
+
+    style Phase1 fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style Phase2 fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style Phase3 fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
+    style Phase4 fill:#0b0f19,stroke:#ef4444,stroke-width:2px,color:#fff
+    style Ship fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
 
 - **1. PRD Define**: I analyzed the spec boundaries and directed the agent to document constraints (such as connection timeouts on dead targets) to form a clear project objective before writing code.
