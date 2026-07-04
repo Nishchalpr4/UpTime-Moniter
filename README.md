@@ -32,27 +32,47 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ## 🧠 My End-to-End Build Thought Process (Phase 0: Scope & PRD)
 
-To build a simple, responsive uptime monitor, I first analyzed the requirements and defined a strict MVP scope to avoid over-engineering:
+I mapped the exact boundaries of the MVP using a visual Scope Diagram and an engineering Risk Matrix:
 
-- **What I Built**:
-  - **Pinger**: FastAPI backend running an `APScheduler` background thread checking URLs every 60s.
-  - **Database**: PostgreSQL logging status codes, millisecond response latencies, and check timestamps.
-  - **UI**: Clean React dashboard displaying current status (UP/DOWN) and average latency metrics.
-- **What I Excluded**: User signup/login, active alerts (Slack/Email), and detailed latency history charts.
-- **Core Risks Handled**:
-  - *Slow target sites*: Enforced a 10s request timeout so unresponsive sites don't block the background scheduler loop.
-  - *Initial lag*: Programmed the backend to ping new URLs synchronously on registration so status displays instantly, preventing any default 60s check delays.
+### 1. Scope Boundary Map
+
+```mermaid
+graph TD
+    subgraph IN_SCOPE [What I Built]
+        A[FastAPI background thread pinger]
+        B[PostgreSQL relational storage]
+        C[React dashboard & metrics panel]
+    end
+
+    subgraph OUT_SCOPE [What I Excluded]
+        D[User authentication & logins]
+        E[Active alerts: Slack / Email]
+        F[SSL certificate expiry checks]
+    end
+
+    style IN_SCOPE fill:#0b0f19,stroke:#10b981,stroke-width:2px,color:#fff
+    style OUT_SCOPE fill:#0b0f19,stroke:#ef4444,stroke-width:2px,color:#fff
+```
+
+### 2. Core Risks & Mitigations
+
+| Risk Identified | How I Handled It (Mitigation) |
+|---|---|
+| Target endpoints hang indefinitely, blocking the scheduler thread. | Enforced a strict **10-second request timeout** on all pings. |
+| SQLite database files throwing write-lock errors inside Docker on Windows. | Avoided SQLite; used **PostgreSQL 15** with mapped volumes. |
+| Dashboard showing blank `PENDING` states upon registering a new URL. | Executed the **initial ping synchronously** in the URL registration API. |
+| API container crashing by attempting connections before Postgres is fully booted. | Configured a **Postgres healthcheck** container dependency. |
 
 ---
 
 ## ⚖️ My Technology Trade-offs
 
-I made the following design decisions based on project constraints and performance requirements:
-
-- **I chose FastAPI over Flask/Express**: I wanted async-native handling for pings and automatic Pydantic request validation out of the box, which keeps the API code clean and highly readable.
-- **I chose APScheduler over Celery**: I wanted to avoid the complexity of setting up and maintaining separate broker (Redis) and worker containers. APScheduler allows me to run ping checks in a background thread inside the same API container.
-- **I chose PostgreSQL over SQLite**: SQLite database files often lock during concurrent write operations and can throw permission errors when shared across Docker container volumes on Windows hosts. Postgres is standard and easily handles multi-container volume persistence.
-- **I chose a Single-File Backend layout**: I merged routes, schemas, database connections, and the scheduler into `backend/main.py` (~150 lines) to eliminate directory-nesting overhead, making the codebase fast to audit, maintain, and package.
+| My Choice | What I Rejected | Why I Chose It |
+|---|---|---|
+| **FastAPI** | Flask / Express | Async execution for concurrent pings; automatic data validation (Pydantic); auto Swagger documentation. |
+| **APScheduler** | Celery + Redis | Avoids the overhead of extra broker/worker containers by running in a thread inside the API process. |
+| **PostgreSQL** | SQLite | Prevents Docker volume access locks and database write failures on Windows hosts. |
+| **Single-File Backend** | Multi-Module Layout | Collapsing schema/routes/pinger into `main.py` removes nested directory boilerplate for MVP velocity. |
 
 ---
 
