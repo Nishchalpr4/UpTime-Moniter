@@ -30,109 +30,39 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to te
 
 ---
 
-## 🌐 The Deployment Sketch
+## 🧠 My End-to-End Build Thought Process (Phase 0: Scope & PRD)
 
-To host this MVP on a cloud provider, I would decouple the containers to run serverlessly on AWS:
+I began this project by focusing strictly on requirement parsing and defining a clear MVP scope before planning any database tables or routes:
 
-- **Static Frontend**: Built using Vite and hosted on **Amazon S3** fronted by **Amazon CloudFront** CDN for low-latency edge delivery.
-- **Backend API**: The FastAPI container hosted on **AWS ECS Fargate** behind an **Application Load Balancer (ALB)**.
-- **Database**: Migrated to a managed **Amazon RDS PostgreSQL** instance with automated backups and security groups.
+### 1. Scope & PRD Mapping (Planning)
+- **Problem Statement Analysis**: I first analyzed the core problem statement. I immediately stripped out unnecessary features (like user login, custom alerts, or complex charts) to focus strictly on a bare-minimum, high-velocity MVP.
+- **Hidden Requirements Discovery**: I fed the problem statement into **Claude 3.5 Sonnet / Opus** to identify potential technical issues.
+- **Goal Definition**: I compiled a Product Requirement Document (PRD) to define explicit boundaries (such as connection timeouts on broken endpoints) and establish a clear objective before writing any code.
 
 ```mermaid
-graph LR
-    Browser[User Browser] --> Route53[Route 53] --> ALB[Application Load Balancer]
-    ALB -->|/*| S3[S3 Static Frontend]
-    ALB -->|/api/*| ECS[ECS Fargate API Containers]
-    ECS --> RDS[(RDS PostgreSQL DB)]
+graph TD
+    A[Analyze Problem Statement] --> B[Identify Core MVP Features]
+    B --> C[Isolate Scope Boundaries: No Auth/Alerts]
+    C --> D[Identify Risks: Connection Timeouts & Volume Locks]
+    D --> E[Establish PRD & Code Constraints]
 
-    style Browser fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style S3 fill:#1e293b,stroke:#38bdf8,color:#fff
-    style ECS fill:#1e293b,stroke:#38bdf8,color:#fff
-    style RDS fill:#1e293b,stroke:#38bdf8,color:#fff
-```
-
-### Hypothetical Terraform (IaC) Configuration
-```hcl
-resource "aws_ecs_cluster" "uptime" {
-  name = "uptime"
-}
-
-resource "aws_db_instance" "postgres" {
-  allocated_storage = 20
-  engine            = "postgres"
-  instance_class    = "db.t3.micro"
-  db_name           = "uptime"
-  username          = "postgres"
-  password          = var.db_password
-  skip_final_snapshot = true
-}
-
-resource "aws_ecs_task_definition" "backend" {
-  family                   = "uptime-backend"
-  network_mode             = "awsvpc"
-  requires_compatibilities = ["FARGATE"]
-  cpu                      = "256"
-  memory                   = "512"
-  container_definitions    = jsonencode([{
-    name  = "backend"
-    image = "${var.ecr_url}:latest"
-    portMappings = [{ containerPort = 8000 }]
-    environment  = [{ name = "DATABASE_URL", value = "postgresql://postgres:${var.db_password}@${aws_db_instance.postgres.endpoint}/uptime" }]
-  }])
-}
+    style A fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style B fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style C fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style D fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
+    style E fill:#064e3b,stroke:#10b981,stroke-width:3px,color:#fff
 ```
 
 ---
 
-## 🧠 My End-to-End Build Thought Process
+## ⚖️ My Technology Trade-offs
 
-I structured my entire workflow into three main stages (Planning, Architecture, and Step-by-Step Execution) to ensure maximum development velocity and eliminate potential project blockers early.
+I made the following design decisions based on project constraints and performance requirements:
 
-### 1. The Design & Execution Flowchart
-
-```mermaid
-graph TD
-    %% Planning Step
-    subgraph Plan ["1. Scope & PRD Mapping (Planning)"]
-        A[Analyze problem statement] --> B[Strip redundant features: Celery/Auth]
-        B --> C[Feed constraints to Claude 3.5 Sonnet]
-        C --> D[Compile PRD with connection timeouts]
-    end
-
-    %% Architecture Step
-    subgraph Arch ["2. Stack Architecture Design"]
-        E[Select FastAPI async API framework] --> F[Configure APScheduler background thread]
-        F --> G[Select PostgreSQL for multi-container locking safety]
-        G --> H[Merge into a clean single-file backend main.py]
-    end
-
-    %% Execution Step
-    subgraph Exec ["3. Step-by-Step Execution Flow"]
-        I[Scaffold: Write package.json/configs manually] --> J[Backend: Parameterised SQL inserts]
-        J --> K[Scheduler: Fallback error handles for dead URLs]
-        K --> L[UX Optimization: Sync ping on POST request]
-        L --> M[UI: Minimal desaturated slate dark CSS]
-        M --> N[Orchestrate: Docker healthcheck pg_isready]
-        N --> O[QA: Patch 0ms React falsy rendering bug]
-    end
-
-    Plan --> Arch --> Exec
-
-    style Plan fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style Arch fill:#0b0f19,stroke:#34d399,stroke-width:2px,color:#fff
-    style Exec fill:#0b0f19,stroke:#8b5cf6,stroke-width:2px,color:#fff
-```
-
-### 2. My Engineering Mindset & Decisions
-
-| Phase | My Thought Process & Decisions | Core Objective |
-|---|---|---|
-| **PRD & Scope Planning** | • I focused on shipping the absolute bare-minimum MVP layout.<br>• I eliminated user logins, charts, and notification integrations to prevent scope creep.<br>• I used Claude 3.5 Sonnet to outline requirements and identify connection timeouts as a major risk factor. | **Build a secure, fast-track MVP.** |
-| **Architecture Selection** | • **FastAPI**: Async-native speeds up concurrent HTTP requests.<br>• **APScheduler**: Avoids complex Redis/Celery queue orchestration by running inside an API background thread.<br>• **PostgreSQL**: Standardized container volume persistence; avoided SQLite which is prone to write lock crashes inside Docker on Windows. | **Establish a robust database and backend contract.** |
-| **Scaffolding & Setup** | • I bypassed local scripting policies on Windows by manually writing Vite package lists instead of relying on default CLI scaffolding scripts. | **Scaffold a clean, dependency-controlled workspace.** |
-| **Backend & Pinger Dev** | • I wrote SQL queries using parameterized placeholders to prevent SQL injection.<br>• I wrapped target checks in robust try/except blocks to log timeouts as `down` states instead of crashing the scheduler thread. | **Build resilient, secure API routes.** |
-| **UX & UI Styling** | • I realized new URLs showed "PENDING" states on creation. I resolved this by running the first ping synchronously in the POST handler.<br>• I designed a desaturated dark slate layout to keep the dashboard highly readable. | **Provide immediate, clean visual feedback.** |
-| **QA & Orchestration** | • I scanned code for edge bugs and resolved a critical JS logic issue where a `0ms` response latency was hidden as falsy on the UI (patched to `!= null`).<br>• I configured database health checks so the backend wait-boots correctly. | **Ship a secure, verified, zero-dependency environment.** |
+- **I chose FastAPI over Flask/Express**: I wanted async-native handling for pings and automatic Pydantic request validation out of the box, which keeps the API code clean and highly readable.
+- **I chose APScheduler over Celery**: I wanted to avoid the complexity of setting up and maintaining separate broker (Redis) and worker containers. APScheduler allows me to run ping checks in a background thread inside the same API container.
+- **I chose PostgreSQL over SQLite**: SQLite database files often lock during concurrent write operations and can throw permission errors when shared across Docker container volumes on Windows hosts. Postgres is standard and easily handles multi-container volume persistence.
+- **I chose a Single-File Backend layout**: I merged routes, schemas, database connections, and the scheduler into `backend/main.py` (~150 lines) to eliminate directory-nesting overhead, making the codebase fast to audit, maintain, and package.
 
 ---
 
@@ -216,3 +146,57 @@ graph TD
 - **Swapping Async Loops for Threads**: An early loop draft block-choked the API thread due to the synchronous `psycopg2` driver. I refactored the scheduler to run on an independent thread using `APScheduler`.
 - **Synchronous Ping Override**: Initial database checks were asynchronous, forcing the dashboard to show `PENDING` states on creation. I refactored the backend to execute the first ping synchronously in the `POST` request, delivering immediate feedback.
 - **0ms Render Fix**: In React, a response latency of `0ms` is falsy and would be hidden. I corrected the UI code to explicitly check `!= null` to solve this rendering logic bug.
+
+---
+
+## 🌐 The Deployment Sketch
+
+To host this MVP on a cloud provider, I would decouple the containers to run serverlessly on AWS:
+
+- **Static Frontend**: Built using Vite and hosted on **Amazon S3** fronted by **Amazon CloudFront** CDN for low-latency edge delivery.
+- **Backend API**: The FastAPI container hosted on **AWS ECS Fargate** behind an **Application Load Balancer (ALB)**.
+- **Database**: Migrated to a managed **Amazon RDS PostgreSQL** instance with automated backups and security groups.
+
+```mermaid
+graph LR
+    Browser[User Browser] --> Route53[Route 53] --> ALB[Application Load Balancer]
+    ALB -->|/*| S3[S3 Static Frontend]
+    ALB -->|/api/*| ECS[ECS Fargate API Containers]
+    ECS --> RDS[(RDS PostgreSQL DB)]
+
+    style Browser fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style S3 fill:#1e293b,stroke:#38bdf8,color:#fff
+    style ECS fill:#1e293b,stroke:#38bdf8,color:#fff
+    style RDS fill:#1e293b,stroke:#38bdf8,color:#fff
+```
+
+### Hypothetical Terraform (IaC) Configuration
+```hcl
+resource "aws_ecs_cluster" "uptime" {
+  name = "uptime"
+}
+
+resource "aws_db_instance" "postgres" {
+  allocated_storage = 20
+  engine            = "postgres"
+  instance_class    = "db.t3.micro"
+  db_name           = "uptime"
+  username          = "postgres"
+  password          = var.db_password
+  skip_final_snapshot = true
+}
+
+resource "aws_ecs_task_definition" "backend" {
+  family                   = "uptime-backend"
+  network_mode             = "awsvpc"
+  requires_compatibilities = ["FARGATE"]
+  cpu                      = "256"
+  memory                   = "512"
+  container_definitions    = jsonencode([{
+    name  = "backend"
+    image = "${var.ecr_url}:latest"
+    portMappings = [{ containerPort = 8000 }]
+    environment  = [{ name = "DATABASE_URL", value = "postgresql://postgres:${var.db_password}@${aws_db_instance.postgres.endpoint}/uptime" }]
+  }])
+}
+```
