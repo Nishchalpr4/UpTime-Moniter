@@ -1,133 +1,78 @@
 # UPtime — Uptime Monitor MVP
 
-A lightweight, containerized full-stack URL monitor that checks website status, logs response times, and renders a clean, dark slate dashboard.
+A simple, containerized full-stack URL monitor that checks website status, logs response times, and displays results in a dark slate dashboard.
 
 ---
 
-## 🏗️ System Flow & Architecture
+## 🏗️ System Architecture
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User as User/Browser
-    participant UI as React UI (5173)
-    participant API as FastAPI (8000)
-    participant DB as Postgres DB (5432)
-    participant Scheduler as APScheduler Thread
+graph LR
+    User([User Browser]) <--> UI[React UI]
+    UI <--> API[FastAPI API]
+    API <--> DB[(PostgreSQL)]
+    Scheduler[Background Pinger] -.->|Ping every 60s| Target[Websites]
+    Scheduler -.->|Save logs| DB
 
-    User->>UI: Add URL (https://example.com)
-    UI->>API: POST /api/urls
-    Note over API: Triggers ping_one() synchronously
-    API->>DB: INSERT initial status & latency
-    API-->>UI: Return created URL (Status: UP/DOWN)
+    style User fill:#0f172a,stroke:#38bdf8,stroke-width:2px,color:#fff
+    style UI fill:#1e293b,stroke:#38bdf8,color:#fff
+    style API fill:#1e293b,stroke:#38bdf8,color:#fff
+    style DB fill:#1e293b,stroke:#38bdf8,color:#fff
+    style Scheduler fill:#1e293b,stroke:#34d399,color:#fff
+    style Target fill:#1e293b,stroke:#64748b,color:#fff
+```
+
+### Setup & Verification
+1. **Launch Stack**: `docker compose up --build`
+2. **Access Dashboard**: Open `http://localhost:5173`.
+3. **Verify UP/DOWN**:
+   - Add `https://example.com` (shows 🟢 **UP** instantly).
+   - Add `https://broken-target-test.xyz` (shows 🔴 **DOWN** instantly).
+
+---
+
+## ⚖️ Technology Trade-offs
+
+- **FastAPI vs Flask**: FastAPI provides async-native handling for pings and automatic Pydantic request validation.
+- **APScheduler vs Celery**: Celery requires extra Redis/worker containers. APScheduler runs in a background thread inside the API container.
+- **PostgreSQL vs SQLite**: SQLite locks database files under write concurrency across Docker container volumes.
+- **Single-File Backend**: Merged routes, pinger, database, and logic into `main.py` (~150 lines) to eliminate nested file overhead.
+
+---
+
+## 🤖 The AI Developer Stack (Cursor + Claude 3.5 Sonnet)
+
+To build and ship this MVP at maximum speed, we chose **Cursor IDE powered by Claude 3.5 Sonnet** as our unified engineering stack. 
+
+### Why Cursor + Claude 3.5 Sonnet? (Trade-off Flow)
+
+```mermaid
+graph TD
+    Start([Need AI Developer Assistant]) --> Workflow{Primary Goal?}
     
-    loop Every 60 seconds
-        Scheduler->>DB: Fetch all monitored URLs
-        Scheduler->>User: Pings HTTP endpoints (10s timeout)
-        Scheduler->>DB: INSERT check results (latency, status, code)
-    end
+    Workflow -->|Multi-file edits & terminal control| Chosen[Cursor + Claude 3.5 Sonnet]
+    Workflow -->|Simple line autocomplete| Copilot[GitHub Copilot]
+    Workflow -->|General Q&A / Copy-paste| Web[ChatGPT / Claude Web]
 
-    loop Every 30 seconds
-        UI->>API: GET /api/urls (Lateral Join)
-        API->>DB: Query URLs + Latest Health Check
-        DB-->>API: URL list with current states
-        API-->>UI: Return JSON
-        UI->>User: Update Dashboard Stats & List
-    end
+    style Chosen fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
+    style Copilot fill:#0f172a,stroke:#64748b,color:#fff
+    style Web fill:#0f172a,stroke:#64748b,color:#fff
 ```
 
----
+### AI Stack Comparison
 
-## ⚡ Setup & Testing
-
-### 1. Launch Stack
-```bash
-docker compose up --build
-```
-*Access the dashboard at `http://localhost:5173` and backend interactive API docs at `http://localhost:8000/docs`.*
-
-### 2. Verify UP/DOWN Detection
-- **Healthy URL**: Add `https://example.com`. It pings instantly and shows 🟢 **UP** with latency (e.g., `120ms`) and `HTTP 200`.
-- **Broken URL**: Add `https://broken-domain-uptime-test.xyz`. It shows 🔴 **DOWN** with `—` latency and a network timeout log.
-- **Server Error**: Add `https://httpstat.us/503`. It shows 🔴 **DOWN** showing `HTTP 503`.
-- **Interactivity**: Clicking **↻ Refresh** locks the state and updates stats without page reloads.
-
----
-
-## 📦 Database Schema (`init.sql`)
-
-```sql
-CREATE TABLE monitored_urls (
-    id         SERIAL PRIMARY KEY,
-    url        TEXT NOT NULL UNIQUE,
-    label      TEXT NOT NULL DEFAULT '',
-    created_at TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE TABLE health_checks (
-    id            SERIAL PRIMARY KEY,
-    url_id        INTEGER REFERENCES monitored_urls(id) ON DELETE CASCADE,
-    status        TEXT NOT NULL,
-    status_code   INTEGER,
-    response_time INTEGER,
-    checked_at    TIMESTAMPTZ DEFAULT NOW()
-);
-
-CREATE INDEX idx_health_checks_url_id ON health_checks(url_id);
-```
-
----
-
-## ⚖️ Design Decisions & Trade-offs
-
-| Component | Selected | Alternatives | Trade-off Analysis |
+| Tool / Model | Strengths | Weaknesses | Why Chosen / Rejected |
 |---|---|---|---|
-| **API** | **FastAPI** | Flask / Express | FastAPI provides async execution for pings, robust request validation via Pydantic, and instant interactive docs. |
-| **Scheduler** | **APScheduler** | Celery + Redis | Celery requires extra worker & broker containers. APScheduler runs in a background thread inside the same API container. |
-| **Database** | **Postgres 15** | SQLite | SQLite locks databases under concurrent writes and has volume sharing issues across Windows/Docker host boundaries. |
-| **Backend File Structure** | **Single-file** | Modular structure | Merged routes, schema models, database connections, and scheduler loops into `main.py` (~150 lines) to eliminate folder-nesting overhead. |
+| **Cursor + Claude 3.5 Sonnet** <br>*(Chosen)* | • Direct folder/file context<br>• Inline multi-file code editing<br>• Terminal agent execution (Docker/npm) | • Higher latency than simple autocompletes | **Selected**: The logical reasoning of Sonnet combined with Cursor's ability to run CLI commands allowed us to scaffold and debug the entire stack in minutes. |
+| **GitHub Copilot** | • Fast, inline line completions<br>• Low latency | • Cannot run shell commands<br>• Poor cross-file reasoning | **Rejected**: Too limited for scaffolding Docker files, database schemas, and wiring APIs together. |
+| **ChatGPT / Claude Web** | • Good for generic syntax/Q&A | • High copy-paste friction<br>• Lacks local codebase context | **Rejected**: Slows down development due to manual file creation and context syncing. |
 
----
-
-## 🤖 Leveraging AI Agents & Tools (The Fast-Track Blueprint)
-
-To build and ship this MVP in record time, we leveraged specialized AI models and agentic workflows at every lifecycle phase:
-
-```mermaid
-flowchart TD
-    A[Phase 0: Scope & PRD] -->|Claude 3.5 Sonnet| B[Phase 1: Architecture]
-    B -->|ChatGPT / Claude| C[Phase 2: Project Scaffold]
-    C -->|Cursor IDE Agent| D[Phase 3: Backend & SQL]
-    D -->|Cursor / Copilot| E[Phase 4: Background Scheduler]
-    E -->|Cursor / Claude| F[Phase 5: Frontend UI & CSS]
-    F -->|v0.dev / Claude| G[Phase 6: API Integration]
-    G -->|Cursor / Sonnet| H[Phase 7: Docker & Compose]
-    H -->|ChatGPT / Phind| I[Phase 8: QA & Bug Patches]
-    I -->|Gemini 1.5 Pro| J[Phase 9: PR Code Review]
-    J -->|Claude 3.5 Sonnet| K[Phase 10: Ship MVP 🚀]
-
-    style A fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style B fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style C fill:#1e293b,stroke:#38bdf8,stroke-width:2px,color:#fff
-    style D fill:#1e293b,stroke:#34d399,stroke-width:2px,color:#fff
-    style E fill:#1e293b,stroke:#34d399,stroke-width:2px,color:#fff
-    style F fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style G fill:#1e293b,stroke:#8b5cf6,stroke-width:2px,color:#fff
-    style H fill:#1e293b,stroke:#f59e0b,stroke-width:2px,color:#fff
-    style I fill:#1e293b,stroke:#ef4444,stroke-width:2px,color:#fff
-    style J fill:#1e293b,stroke:#ec4899,stroke-width:2px,color:#fff
-    style K fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
-```
-
-### Specialized AI Matrix: Best Tools for Each Task
-
-| Development Phase | Best AI Tool / Model | Why it is the Best & How to Leverage It | Speed Optimization |
-|---|---|---|---|
-| **Phase 0 & 1: Requirements & Architecture** | **Claude 3.5 Sonnet** | Best in class for logical reasoning and comparative analysis. Leverage it to analyze specifications, construct PRDs, and compare tech stacks (e.g., SQLite vs Postgres). | Prevents scope creep and avoids over-engineering early. |
-| **Phase 2 & 7: Scaffold & Docker Setup** | **ChatGPT (GPT-4o) / Phind** | Highly optimized for standard configuration files and system shell execution. Good at drafting default `Dockerfiles`, `docker-compose.yml`, and packages. | Speeds up initial environment configurations. |
-| **Phase 3 & 4: Backend API & Scheduler** | **Cursor IDE (Agent Mode)** | Integrates directly with the system terminal and codebase context. You can command the agent to run migrations, install dependencies, and edit code inline. | Cuts down manual file-switching and route wiring time. |
-| **Phase 5: Frontend UI & Styling** | **v0.dev (by Vercel)** | Generates production-ready React components and responsive styling (Tailwind/CSS) visually from screenshots or text descriptions. | Eliminates hours of CSS debugging and UI layout drafting. |
-| **Phase 8 & 9: QA, Refactoring & Code Review** | **Gemini 1.5 Pro** | Huge context window (2M tokens) allows you to feed the *entire* repository codebase into a single prompt to check for logic flaws, security issues, and redundant modules. | Catches edge cases (like `0ms` truthy bugs) and performance blocks instantly. |
+### How AI Was Leveraged Across Phases
+1. **Requirements & Architecture**: Used Claude 3.5 Sonnet to map out PRD scope boundaries and draft SQL table schemas.
+2. **Scaffolding & Boilerplate**: Leveraged Cursor's Terminal Agent to create directories and write package dependency files.
+3. **Backend & Pinger**: Commanded Cursor to implement synchronous initial checks in `main.py` to support instant UI state rendering.
+4. **UI Styling**: Prompts in Cursor quickly compiled the sleek dark theme CSS without manual color debugging.
+5. **Code Review & QA**: Used the large context window to scan the completed code, patching logic edge cases (like handling `0ms` response times).
 
 ---
 
@@ -135,19 +80,14 @@ flowchart TD
 
 ```mermaid
 graph LR
-    User[User Browser] -->|DNS / HTTPS| Route53[Route 53]
-    Route53 --> ALB[Application Load Balancer]
-    ALB -->|/*| CloudFront[CloudFront CDN]
-    CloudFront -->|Read Assets| S3[S3 Static Frontend]
+    Browser[User Browser] --> Route53[Route 53] --> ALB[Application Load Balancer]
+    ALB -->|/*| S3[S3 Static Frontend]
     ALB -->|/api/*| ECS[ECS Fargate API Containers]
-    ECS -->|SQL Query| RDS[(RDS PostgreSQL DB)]
+    ECS --> RDS[(RDS PostgreSQL DB)]
 ```
 
-### Terraform Infrastructure snippet
 ```hcl
-resource "aws_ecs_cluster" "uptime" {
-  name = "uptime"
-}
+resource "aws_ecs_cluster" "uptime" { name = "uptime" }
 
 resource "aws_db_instance" "postgres" {
   allocated_storage = 20
