@@ -23,22 +23,10 @@ UPtime is a lightweight, full-stack monitor that tracks the availability of web 
 
 ## 🧪 Testing Steps
 
-To verify that the application correctly detects and displays both active and inactive states, follow these steps:
-
-1. Open **[http://localhost:5173](http://localhost:5173)** in your browser.
-2. **Add a Working URL**:
-   - Input: `https://example.com`
-   - Label: `Healthy Target`
-   - *Result*: The dashboard immediately registers the URL and pings it synchronously. The status indicator instantly turns 🟢 **UP** with latency (e.g., `124ms`) and a `200` status code.
-3. **Add an Intentionally Broken URL**:
-   - Input: `https://nonexistent-url-domain-test-uptime.xyz`
-   - Label: `Broken Target`
-   - *Result*: The status indicator instantly turns 🔴 **DOWN** with `—` latency and records the connection failure.
-4. **Add a Server Error URL**:
-   - Input: `https://httpstat.us/503`
-   - Label: `Server Error Target`
-   - *Result*: The status indicator instantly turns 🔴 **DOWN** with `HTTP 503`.
-5. **Test Manual Refresh**: Click **↻ Refresh** in the header. The button text shifts to `Refreshing...` and locks interactions until the fetch completes.
+Open **[http://localhost:5173](http://localhost:5173)** and add these URLs to test:
+- **Active state**: Add `https://example.com` → Instantly displays 🟢 **UP** (with ms latency).
+- **Network failure**: Add `https://nonexistent-url-domain-test.xyz` → Instantly displays 🔴 **DOWN** (with `—` latency).
+- **HTTP status failure**: Add `https://httpstat.us/503` → Instantly displays 🔴 **DOWN** (showing `HTTP 503`).
 
 ---
 
