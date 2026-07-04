@@ -1,0 +1,53 @@
+services:
+
+  # ──────────────────────────────────────────
+  # 1. DATABASE — PostgreSQL
+  # ──────────────────────────────────────────
+  db:
+    image: postgres:15-alpine       # official Postgres image, alpine = small
+    environment:
+      POSTGRES_USER: uptime
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: uptime
+    volumes:
+      # Persist DB data on your machine so it survives container restarts
+      - postgres_data:/var/lib/postgresql/data
+      # Auto-run init.sql on first boot (creates our tables)
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      # Docker will keep checking this until it passes before starting backend
+      test: ["CMD-SHELL", "pg_isready -U uptime -d uptime"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # ──────────────────────────────────────────
+  # 2. BACKEND — FastAPI
+  # ──────────────────────────────────────────
+  backend:
+    build: ./backend                # build from backend/Dockerfile
+    ports:
+      - "8000:8000"                 # laptop:8000 → container:8000
+    environment:
+      DATABASE_URL: postgresql://uptime:secret@db:5432/uptime
+      # Note: hostname is "db" — that's the service name above,
+      # Docker's internal DNS resolves it automatically
+    depends_on:
+      db:
+        condition: service_healthy  # wait for DB healthcheck to pass
+
+  # ──────────────────────────────────────────
+  # 3. FRONTEND — React/Vite
+  # ──────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"                 # laptop:5173 → container:5173
+    environment:
+      VITE_API_URL: http://localhost:8000   # frontend calls backend via YOUR browser
+    depends_on:
+      - backend
+
+# Named volume — Docker manages this folder on your machine
+volumes:
+  postgres_data:
