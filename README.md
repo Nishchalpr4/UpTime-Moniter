@@ -1,6 +1,12 @@
-# UPtime — Uptime Monitor MVP
+# UPtime — Lightweight Full-Stack Uptime Monitor MVP
 
-A simple, containerized full-stack URL monitor that checks website status, logs response times, and displays results in a dark slate dashboard.
+## 🎯 Purpose of the Project
+UPtime was built to solve a specific challenge: creating a highly responsive, self-contained uptime monitoring dashboard that tracks the health of registered web services without the overhead of heavy third-party monitoring suites. 
+
+I designed this project to demonstrate:
+- **Execution Velocity**: Delivering a complete, operational multi-container MVP in minimal time.
+- **Architectural Pragmatism**: Keeping database interactions, scheduler tasks, and API endpoints contained in a single backend script to prevent directory structure bloat.
+- **Immediate Feedback Loop**: Overriding typical asynchronous scheduler delays so that newly added URLs are pinged synchronously and display their up/down status instantly on the user dashboard.
 
 ---
 
