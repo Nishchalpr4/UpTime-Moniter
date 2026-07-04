@@ -46,7 +46,9 @@ I made the following design decisions based on project constraints and performan
 
 I leveraged **Cursor IDE (powered by Claude 3.5 Sonnet)** as my primary coding agent to accelerate development velocity, allowing me to build, test, and ship this full-stack MVP in less than an hour.
 
-### Development Stage Flowchart
+<table>
+  <tr>
+    <td valign="top" width="50%">
 
 ```mermaid
 graph TD
@@ -66,18 +68,46 @@ graph TD
     style Ready fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
 ```
 
-### Detailed Stage Mapping & AI Selection Trade-offs
+</td>
+<td valign="top" width="50%">
+  <h4>How I Guided the Coding Agent:</h4>
+  <ul>
+    <li><strong>1. Requirements & Architecture</strong>: I prompted the agent to parse the specs, set PRD boundaries, and chose Postgres and APScheduler to limit container bloat.</li>
+    <li><strong>2. Scaffolding & Setup</strong>: Bypassed Windows script locks by having the agent manually write package configs and HTML entry points.</li>
+    <li><strong>3. Backend & Pinger</strong>: Generated FastAPI endpoints and independent background threads in a single main.py file.</li>
+    <li><strong>4. Instant Pings</strong>: Moved the ping execution inside the POST request thread so the frontend renders UP/DOWN status instantly.</li>
+    <li><strong>5. Frontend & Themes</strong>: Built React logic and styled it into a desaturated dark slate layout to align with dark theme standards.</li>
+    <li><strong>6. QA & Launch</strong>: Inspected the code for edge case bugs (fixing 0ms truthy checks) and orchestrated compose with DB health checks.</li>
+  </ul>
+  <br/>
+  <h4>Speed Boost Achieved:</h4>
+  <p>Leveraging Cursor's inline editing and terminal commands eliminated hours of manual code wiring, environment script debugging, and hex-color selection adjustments, allowing me to ship in minutes.</p>
+</td>
+</tr>
+</table>
 
-I chose to rely entirely on **Cursor (Claude 3.5 Sonnet)** as my unified IDE workspace assistant rather than copying code back and forth from Web Chats (ChatGPT/Claude) or relying on simple auto-completers (GitHub Copilot).
+### Why Cursor + Claude 3.5 Sonnet? (Trade-off Flow)
 
-| Stage | How I Approached & Leveraged the Agent | Speed Boost |
-|---|---|---|
-| **1. Requirements & Architecture** | I prompted the agent to parse the assignment specifications. I directed it to draft the PRD scope and table schemas. I challenged the necessity of user authentication and Celery workers to keep the architecture minimal. | **Scope Control**: Prevented over-engineering before writing any code. |
-| **2. Scaffolding & Setup** | I created the directories. When Windows script policies blocked Vite's automated installer, I did not waste time troubleshooting local settings; I instructed Cursor to write `package.json`, `vite.config.js`, and `index.html` manually. | **Bypassed Blocks**: Handled environment script issues in seconds. |
-| **3. Backend API & Scheduler** | I collapsed the backend into `main.py`. I commanded Cursor to generate the FastAPI routes and write the database pinger logic. I had the agent setup `BackgroundScheduler` in a separate thread so database operations wouldn't block API requests. | **Concurrent Dev**: Generated endpoints and pinger loops concurrently. |
-| **4. Instant Pings** | Initially, newly registered URLs stayed as "PENDING" for up to 60s. I updated the backend to execute the initial ping synchronously inside the `POST` request thread. The database is updated before returning the response, making status changes instant on the UI. | **UX Optimization**: Resolved UI status lag. |
-| **5. Frontend & Themes** | I commanded Cursor to build the React layout. When the first design looked too bright, I directed it to redesign the styling into a desaturated dark slate layout (`#0b0f19` bg, `#151b2c` cards) using sky blue accents. | **Aesthetic Alignment**: Rapid CSS iterations without manual color-hex hunt. |
-| **6. QA, Refactoring & Launch** | I fed the entire codebase back into the agent for a final review. I caught a JS bug where a `0ms` response time was evaluated as falsy and hidden on the UI; I patched this to check for `!= null`. I wrote the `docker-compose.yml` adding health checks to Postgres. | **Zero-Downtime Launch**: Rebuilt Docker containers with clean, debugged code. |
+```mermaid
+graph TD
+    Start([Need AI Developer Assistant]) --> Workflow{Primary Goal?}
+    
+    Workflow -->|Multi-file edits & terminal control| Chosen[Cursor + Claude 3.5 Sonnet]
+    Workflow -->|Simple line autocomplete| Copilot[GitHub Copilot]
+    Workflow -->|General Q&A / Copy-paste| Web[ChatGPT / Claude Web]
+
+    style Chosen fill:#064e3b,stroke:#34d399,stroke-width:3px,color:#fff
+    style Copilot fill:#0f172a,stroke:#64748b,color:#fff
+    style Web fill:#0f172a,stroke:#64748b,color:#fff
+```
+
+### AI Stack Comparison
+
+| Tool / Model | Strengths | Weaknesses | Why I Chose It Over Others |
+|---|---|---|---|
+| **Cursor + Claude 3.5 Sonnet** <br>*(Chosen)* | • Direct folder/file context<br>• Inline multi-file code editing<br>• Terminal agent execution (Docker/npm) | • Higher latency than simple autocompletes | **I selected this** because the logical reasoning of Sonnet combined with Cursor's ability to run CLI commands allowed me to scaffold and debug the entire stack in minutes without leaving my editor. |
+| **GitHub Copilot** | • Fast, inline line completions<br>• Low latency | • Cannot run shell commands<br>• Poor cross-file reasoning | **I rejected this** because it is too limited for scaffolding Docker files, database schemas, and wiring APIs together. |
+| **ChatGPT / Claude Web** | • Good for generic syntax/Q&A | • High copy-paste friction<br>• Lacks local codebase context | **I rejected this** because copy-pasting code between the browser and my editor slows down development speed significantly. |
 
 ---
 
