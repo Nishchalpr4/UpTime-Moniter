@@ -28,8 +28,6 @@ Open **[http://localhost:5173](http://localhost:5173)** and add these endpoints 
 - **Network Failure**: Add `https://nonexistent-url-target.xyz` ──► Instantly displays 🔴 **DOWN** (with `—` latency).
 - **HTTP Status Failure**: Add `https://httpstat.us/503` ──► Instantly displays 🔴 **DOWN** (showing `HTTP 503`).
 
----
-
 ## 🏗️ System Architecture & Data Flow
 
 ```mermaid
@@ -38,15 +36,11 @@ graph TD
     UI -->|2. POST request| API[FastAPI API]
     API -->|3. Initial synchronous ping| DB[(PostgreSQL)]
     
-    loop Every 60s
-        Scheduler[Background Pinger] -->|4. Ping checks| Websites[Target Sites]
-        Scheduler -->|5. Log health check results| DB
-    end
+    Scheduler[Background Pinger] -->|4. Ping checks every 60s| Websites[Target Sites]
+    Scheduler -->|5. Log health check results| DB
 
-    loop Every 30s
-        UI -->|6. Polling update requests| API
-        API -->|7. Fetch current states| DB
-    end
+    UI -->|6. Polling update requests every 30s| API
+    API -->|7. Fetch current states| DB
 
     style User fill:#0b0f19,stroke:#38bdf8,stroke-width:2px,color:#fff
     style UI fill:#151b2c,stroke:#38bdf8,color:#fff
